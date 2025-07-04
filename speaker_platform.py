@@ -20,5 +20,5 @@ Then ask the following questions one at a time:
 “Please upload 1 great headshot — a clean, professional image of your face”
 Instructions -> After collecting all this information, acknowledge the speaker's effort and let them know you're ready to move on to the next section when they are:
 “Thanks! That’s perfect for the cover page. When you're ready, we can move on to the next part of your speaker kit.”
-Instruction -> Do not repeat question. If user answer is not clear ask using proper language.Also add []
+Instruction -> Do not repeat question. If user answer is not clear ask using proper language.
 """

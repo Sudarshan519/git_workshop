@@ -111,17 +111,33 @@ async def login(request: Request, username: str = Form(...)):
     db.add(UserSession(username=username, sessionid=session_id,agent_session_id=session))
     db.commit()
     db.close()
-
-    return RedirectResponse("/", status_code=303)
+    return  {"status": "ok","message":message}
+    return RedirectResponse("/", status_code=200)
 
 @app.post("/send")
-async def send_message(request: Request, message: str = Form(""), file: Optional[UploadFile] = File(None),db: Session = Depends(get_db),q: Optional[str] = Query(None, min_length=3, alias="query")):
+async def send_message(request: Request,restart:bool=False, message: str = Form(""), file: Optional[UploadFile] = File(None),db: Session = Depends(get_db),q: Optional[str] = Query(None, min_length=3, alias="query")):
     username = request.session.get("username")
     sessionid = request.session.get("session")
     base_url = str(request.base_url).rstrip("/")
     print(sessionid)
     image=None
     response=None
+    if restart:
+        response = agent.run("Let's start")
+        session_id = str(uuid4())
+        request.session["username"] = username
+        request.session["agentResponse"] = {"output": {"sessionid": session_id}}
+        response = agent.run("Let's start")
+        session = response.data.session_id
+        message=response.data.output
+        request.session["session"] = session
+        db = SessionLocal()
+        new_msg = ChatMessage(user="agent", message=message, image=None,session_id=session)
+        db.add(new_msg)
+        db.add(UserSession(username=username, sessionid=session_id,agent_session_id=session))
+        db.commit()
+        db.close()
+        return {"status": "ok","message":message}
     if not username:
       session_id = str(uuid4())
       request.session["username"] = username
@@ -140,7 +156,7 @@ async def send_message(request: Request, message: str = Form(""), file: Optional
   
       return {}
     
-    if file : 
+    if file and file.filename : 
         ext = file.filename.split(".")[-1]
         filename = f"{uuid4().hex}.{ext}"
         filepath = os.path.join(UPLOAD_DIR, filename)
@@ -152,13 +168,13 @@ async def send_message(request: Request, message: str = Form(""), file: Optional
     else:
         response=agent.run(message,session_id=sessionid)
         print(response.data.output)
-        message=response.data.output
+        # message=response.data.output
     new_msg = ChatMessage(user=username, message=message, image=image,session_id=sessionid)
     db.add(new_msg)
     db.commit()
     db.close()
     message=markdown.markdown(response.data.output)
-    if message.__contains__("ready to move on to the next section")or message.__contains__("cover page"):
+    if message.__contains__("ready to move on to the next section") or message.__contains__("next section of your speaker kit")or message.__contains__("cover page") or message.__contains__("What section would you like to work on next"):
         data=agent.run("provide me speaker kit of completed sesion",session_id=sessionid)
         kit_data=request_speaker_kit(data.data.output)
         print(kit_data)
@@ -166,7 +182,7 @@ async def send_message(request: Request, message: str = Form(""), file: Optional
         create_speaker_kit_cover(
             pdf_path=pdf_path,
             bg_image_path="publicspeakerhero.jpeg", # Original unblurred image path
-            headshot_path="static"+kit_data['images']['headshot']['url'].split("/static")[1],
+            headshot_path='static'+image.split("/static")[1],
             speaker_name=kit_data['name'],
             tagline=kit_data['tagline'],
             tags=kit_data['title'],
@@ -191,7 +207,7 @@ async def send_message(request: Request, message: str = Form(""), file: Optional
         db.add(new_msg)
         db.commit()
         db.close() 
-        return {"status": "ok","message": f"{base_url}{pdf_path}" }
+        return {"status": "ok","message": f"{base_url}{pdf_path}","pdf":"{base_url}{pdf_path}" }
     data = {"user": "agent", "message":message , "image": None,"session_id":sessionid}
 
     new_msg = ChatMessage(user= "agent", message=message, session_id=sessionid)
