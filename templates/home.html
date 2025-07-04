@@ -546,7 +546,8 @@
         const formData = new FormData(form);
         const messageInput = form.elements.message;
         const message = messageInput.value.trim();
-        
+         await fetch("/send", {  method: "POST", body: formData  });
+            loadMessages();
         if (message) {
           // Add user message to chat immediately
           addMessageToChat({
@@ -563,7 +564,7 @@
           
           try {
             // Send to server
-          await fetch("/send", {  method: "POST", body: formData  });
+        //   await fetch("/send", {  method: "POST", body: formData  });
             // Load new messages
             await loadMessages();
           } catch (error) {
