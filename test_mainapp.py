@@ -111,7 +111,7 @@ async def login(request: Request, username: str = Form(...)):
     db.add(UserSession(username=username, sessionid=session_id,agent_session_id=session))
     db.commit()
     db.close()
-    return  {"status": "ok","message":message}
+    # return  {"status": "ok","message":message}
     return RedirectResponse("/", status_code=200)
 
 @app.post("/send")

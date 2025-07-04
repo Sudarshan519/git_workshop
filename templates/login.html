@@ -1,7 +1,61 @@
+    <style>
+      body {
+        margin: 0;
+        font-family: sans-serif;
+        background: url("https://via.placeholder.com/1365x768") center/cover
+          no-repeat;
+        backdrop-filter: blur(8px);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .login-box {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        width: 300px;
+      }
+
+      .login-box h1 {
+        margin-bottom: 30px;
+        font-size: 22px;
+      }
+
+      .login-box input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      .login-box button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 20px;
+        background: linear-gradient(90deg, #d700ff, #ff2a7f);
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+      }
+
+      .login-box button:hover {
+        opacity: 0.9;
+      }
+    </style> <div class="login-box">
 <form id="loginForm">
-    <input name="username" placeholder="Enter your name" required>
+      <h1>AI Chat Login</h1>
+    <input name="username" type="text" placeholder="Enter your name" required>
     <button type="submit">Join</button>
-</form>
+</form></div>
 
 <script>
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
