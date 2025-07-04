@@ -1,0 +1,21 @@
+<form id="loginForm">
+    <input name="username" placeholder="Enter your name" required>
+    <button type="submit">Join</button>
+</form>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault(); // prevent form from submitting normally
+
+    const formData = new FormData(this);
+
+    // Optionally send the form data to the server if needed
+    await fetch('/login', {
+        method: 'POST',
+        body: formData,
+    });
+
+    // Then redirect to "/"
+    window.location.href = '/';
+});
+</script>

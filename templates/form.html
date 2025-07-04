@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Create Speaker Kit</title>
+</head>
+<body>
+    <h1>Create Your Speaker Kit</h1>
+
+    {% if message %}
+        <p style="color: green;">{{ message }}</p>
+        <p><a href="{{ pdf_url }}" target="_blank">Download your Speaker Kit PDF</a></p>
+    {% endif %}
+
+    <form action="/generate_speaker_kit/" method="post" enctype="multipart/form-data">
+        <label>Full Name:</label><br />
+        <input type="text" name="full_name" required /><br /><br />
+
+        <label>One-line Tagline:</label><br />
+        <input type="text" name="tagline" required /><br /><br />
+
+        <label>2-4 Titles (e.g. Author | Speaker):</label><br />
+        <input type="text" name="titles" required /><br /><br />
+
+        <label>Website or Email:</label><br />
+        <input type="text" name="website" required /><br /><br />
+
+        <label>Contact Email:</label><br />
+        <input type="email" name="email" required /><br /><br />
+
+        <label>Speaker Bio (100-150 words):</label><br />
+        <textarea name="bio" rows="6" cols="50" required></textarea><br /><br />
+
+        <label>Hero Photo (Full-page image):</label><br />
+        <input type="file" name="hero_photo" accept="image/*" required /><br /><br />
+
+        <label>Professional Headshot:</label><br />
+        <input type="file" name="headshot" accept="image/*" required /><br /><br />
+
+        <button type="submit">Generate Speaker Kit PDF</button>
+    </form>
+</body>
+</html>
