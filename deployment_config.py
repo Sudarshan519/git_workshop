@@ -2,7 +2,7 @@ import os
 from typing import List
 
 # Environment detection
-ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "production")
 IS_PRODUCTION = ENVIRONMENT.lower() == "production"
 
 # CORS Configuration
