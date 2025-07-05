@@ -40,6 +40,7 @@ origins = [
     "http://localhost:8000",  # FastAPI dev server
     "http://127.0.0.1:8000",  # FastAPI dev server alternative
     "https://speaker-kit.testir.xyz",
+    "https://speaker-kit-hotei1223s-projects.vercel.app"
 ]
 
 app.add_middleware(

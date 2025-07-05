@@ -12,7 +12,7 @@ def get_cors_origins() -> List[str]:
         # In production, specify your actual domains
         return [
             "https://speaker-kit.testir.xyz",
-            "https://speaker-kit.testir.xyz/speaker-kit"
+            "https://speaker-kit-hotei1223s-projects.vercel.app"
         ]
     else:
         # Development - allow all origins
@@ -43,4 +43,4 @@ if __name__ == "__main__":
     print(f"Port: {PORT}")
     print(f"Reload: {RELOAD}")
     print(f"Database URL: {DATABASE_URL}")
-    print(f"CORS Origins: {get_cors_origins()}") 
+    print(f"CORS Origins: {get_cors_origins()}")
