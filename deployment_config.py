@@ -11,12 +11,8 @@ def get_cors_origins() -> List[str]:
     if IS_PRODUCTION:
         # In production, specify your actual domains
         return [
-    "http://localhost:3000",  # React dev server
-    "http://localhost:5173",  # if using Vite
-    "http://127.0.0.1:3000",  # alternative
-    "http://localhost:8000",  # FastAPI dev server
-    "http://127.0.0.1:8000",  # FastAPI dev server alternative
-    "https://speaker-kit.testir.xyz"
+            "https://speaker-kit.testir.xyz",
+            "https://speaker-kit.testir.xyz/speaker-kit"
         ]
     else:
         # Development - allow all origins
