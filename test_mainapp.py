@@ -31,7 +31,12 @@ app = FastAPI(
     openapi_url="/openapi.json",
     root_path="/speaker-kit"
 )
-app.add_middleware(SessionMiddleware, secret_key="super-secret-y")
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="super-secret-y",
+    same_site="none",   # allow cross-site cookies (required for front-end on different domain)
+    https_only=True      # cookie will be sent only over HTTPS (required when SameSite=None)
+)
 # Allow requests from your React frontend and deployment domains
 origins = [
     "https://speaker-kit.testir.xyz",                 # Vercel domain
