@@ -16,7 +16,7 @@ def get_cors_origins() -> List[str]:
         ]
     else:
         # Development - allow all origins
-        return ["*"]
+        return ["https://speaker-kit.testir.xyz"]
 
 # Server Configuration
 HOST = os.environ.get("HOST", "0.0.0.0")

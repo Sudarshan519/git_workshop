@@ -34,14 +34,9 @@ app = FastAPI(
 app.add_middleware(SessionMiddleware, secret_key="super-secret-y")
 # Allow requests from your React frontend and deployment domains
 origins = [
-    "http://localhost:3000",  # React dev server
-    "http://localhost:5173",  # if using Vite
-    "http://127.0.0.1:3000",  # alternative
-    "http://localhost:8000",  # FastAPI dev server
-    "http://127.0.0.1:8000",  # FastAPI dev server alternative
     "https://speaker-kit.testir.xyz",
-    "https://speaker-kit-hotei1223s-projects.vercel.app",
-    "*"
+    # "https://speaker-kit-hotei1223s-projects.vercel.app",
+    # "*"
 ]
 
 app.add_middleware(
