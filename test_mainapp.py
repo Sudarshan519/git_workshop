@@ -28,7 +28,8 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    openapi_url="/openapi.json"
+    openapi_url="/openapi.json",
+    root_path="/speaker-kit"
 )
 app.add_middleware(SessionMiddleware, secret_key="super-secret-y")
 # Allow requests from your React frontend and deployment domains
