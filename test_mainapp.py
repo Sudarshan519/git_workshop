@@ -33,19 +33,23 @@ app = FastAPI(
 )
 app.add_middleware(SessionMiddleware, secret_key="super-secret-y")
 # Allow requests from your React frontend and deployment domains
-origins = [
-    "https://speaker-kit.testir.xyz",
-    # "https://speaker-kit-hotei1223s-projects.vercel.app",
-    # "*"
-]
+# origins = [
+#     "http://localhost:3000",  # React dev server
+#     "http://localhost:5173",  # if using Vite
+#     "http://127.0.0.1:3000",  # alternative
+#     "http://localhost:8000",  # FastAPI dev server
+#     "http://127.0.0.1:8000",  # FastAPI dev server alternative
+#     "https://speaker-kit.testir.xyz",
+#     "https://speaker-kit-hotei1223s-projects.vercel.app"
+# ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,  # important if using session cookies
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_credentials=True,  # important if using session cookies
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 templates = Jinja2Templates(directory="templates")
 
 UPLOAD_DIR = "static/uploads"
