@@ -22,18 +22,28 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 # === Setup ===
-app = FastAPI()
+app = FastAPI(
+    title="Speaker Kit API",
+    description="API for generating speaker kits and managing chat sessions",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json"
+)
 app.add_middleware(SessionMiddleware, secret_key="super-secret-y")
-# Allow requests from your React frontend
+# Allow requests from your React frontend and deployment domains
 origins = [
     "http://localhost:3000",  # React dev server
     "http://localhost:5173",  # if using Vite
     "http://127.0.0.1:3000",  # alternative
+    "http://localhost:8000",  # FastAPI dev server
+    "http://127.0.0.1:8000",  # FastAPI dev server alternative
+    "*"  # Allow all origins for deployment - adjust this for production
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # or ["*"] to allow all origins
+    allow_origins=origins,
     allow_credentials=True,  # important if using session cookies
     allow_methods=["*"],
     allow_headers=["*"],
