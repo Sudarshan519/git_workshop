@@ -2,7 +2,7 @@ import os
 from typing import List
 
 # Environment detection
-ENVIRONMENT = os.environ.get("ENVIRONMENT", "production")
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 IS_PRODUCTION = ENVIRONMENT.lower() == "production"
 
 # CORS Configuration
@@ -12,7 +12,8 @@ def get_cors_origins() -> List[str]:
         # In production, specify your actual domains
         return [
             "https://speaker-kit.testir.xyz",
-            "https://speaker-kit-hotei1223s-projects.vercel.app"
+            "https://speaker-kit-hotei1223s-projects.vercel.app",
+            "*"
         ]
     else:
         # Development - allow all origins
