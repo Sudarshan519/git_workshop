@@ -103,7 +103,7 @@ async def home(request: Request):
     sessionid = request.session.get("agentResponse", {}).get("output", {}).get("sessionid", "")
     if not username:
         return  templates.TemplateResponse("login.html", {"request": request})
-    return templates.TemplateResponse("home.html", {"request": request,"username":username ,"sessionid":sessionid})
+    return templates.TemplateResponse("home1.html", {"request": request,"username":username ,"sessionid":sessionid})
 from pdf.app import create_speaker_kit_cover
 
 @app.post("/login")

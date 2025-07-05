@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        
+    </style>
+</head>
+<body>
+     <h2>Welcome, {{username}}</h2>
+    <h4>Session ID: {{sessionid }}</h4>
+    <div id="chatbox" style="height:700px; overflow:auto; border:1px solid #ccc;"></div>
+    <form id="chatForm">
+        <input type="text" name="message" placeholder="Type message">
+        <input type="file" name="file">
+        <button type="submit">Send</button>
+    </form>
+    <script>
+        const chatbox = document.getElementById("chatbox");
+        const form = document.getElementById("chatForm");
+        form.onsubmit = async (e) => { 
+            e.preventDefault();
+            const formData = new FormData(form);  form.reset();
+            await fetch("/send", {  method: "POST", body: formData  });
+            loadMessages();
+          
+         };
+        async function loadMessages() { 
+            const res = await fetch("/messages");
+            const messages = await res.json();
+            chatbox.innerHTML = "";
+            messages.forEach(msg => { 
+                const div = document.createElement("div");
+                div.innerHTML = "<strong>" + msg.user + "</strong>: " + msg.message;
+                if (msg.image) { 
+                    const img = document.createElement("img");
+                    img.src = msg.image;
+                    img.style.maxWidth = "200px";
+                    div.appendChild(document.createElement("br"));
+                    div.appendChild(img);
+                 }
+                chatbox.appendChild(div);
+            });
+            chatbox.scrollTop = chatbox.scrollHeight;
+         }loadMessages();
+
+        
+    </script>
+</body>
+</html>
