@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 import markdown
 from requests import Session
@@ -16,7 +17,7 @@ from sqlalchemy import desc
 import os, shutil 
 from speaker_platform_main import agent
 from aixplain.modules.agent import OutputFormat
-from request_speaker_kit import request_speaker_kit
+# from request_speaker_kit import request_speaker_kit
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -93,7 +94,7 @@ async def home(request: Request):
     sessionid = request.session.get("agentResponse", {}).get("output", {}).get("sessionid", "")
     if not username:
         return  templates.TemplateResponse("login.html", {"request": request})
-    return templates.TemplateResponse("home1.html", {"request": request,"username":username ,"sessionid":sessionid})
+    return templates.TemplateResponse("home.html", {"request": request,"username":username ,"sessionid":sessionid})
 from pdf.app import create_speaker_kit_cover
 
 @app.post("/login")
@@ -111,7 +112,7 @@ async def login(request: Request, username: str = Form(...)):
     db.add(UserSession(username=username, sessionid=session_id,agent_session_id=session))
     db.commit()
     db.close()
-    # return  {"status": "ok","message":message}
+    return  {"status": "ok","message":message}
     return RedirectResponse("/", status_code=200)
 
 @app.post("/send")
@@ -154,7 +155,7 @@ async def send_message(request: Request,restart:bool=False, message: str = Form(
       db.close()
       return {"status": "ok","message":message}
   
-      return {}
+    #   return {}
     
     if file and file.filename : 
         ext = file.filename.split(".")[-1]
@@ -175,39 +176,80 @@ async def send_message(request: Request,restart:bool=False, message: str = Form(
     db.close()
     message=markdown.markdown(response.data.output)
     if message.__contains__("ready to move on to the next section") or message.__contains__("next section of your speaker kit")or message.__contains__("cover page") or message.__contains__("What section would you like to work on next"):
-        data=agent.run("provide me speaker kit of completed sesion",session_id=sessionid)
-        kit_data=request_speaker_kit(data.data.output)
-        print(kit_data)
-        pdf_path=f"static/Speaker_Kit_Cover_Two_Pages_Wide_Short{int(time.time())}.pdf"
-        create_speaker_kit_cover(
-            pdf_path=pdf_path,
-            bg_image_path="publicspeakerhero.jpeg", # Original unblurred image path
-            headshot_path='static'+image.split("/static")[1],
-            speaker_name=kit_data['name'],
-            tagline=kit_data['tagline'],
-            tags=kit_data['title'],
-            blur_radius=15,
-            about_text=(
-                "Jordan Smith is a visionary leader and acclaimed author, renowned for his "
-                "transformative insights into modern leadership and technological innovation. "
-                "With over two decades of experience, Jordan empowers organizations and individuals "
-                "to navigate complex challenges and unlock their full potential in the digital age."
-            ),
-            career_highlights=[
-                  "Authored best-selling book 'The AI Alchemist: ' ",
-                "Keynote speaker at over 100 international conferences on AI and leadership,",
-                "Led a groundbreaking initiative that resulted in a 30% efficiency ",
-                "Recognized as 'Top Innovator in Tech' by TechForward Magazine (2023)  ",
-                "Founded a highly successful startup focused on ethical AI solutions,  ",
-                "Delivered a highly-rated TEDx talk on 'The Future of Human-AI Collaboration .",
-            ]
-        )
-        base_url = str(request.base_url)  
-        new_msg = ChatMessage(user=username, message=f"{base_url}{pdf_path}", image=image,session_id=sessionid)
-        db.add(new_msg)
-        db.commit()
-        db.close() 
-        return {"status": "ok","message": f"{base_url}{pdf_path}","pdf":"{base_url}{pdf_path}" }
+        data = agent.run(
+            """extract data from the session in json format like 
+               {"name":"[Name]" ,"email":"[Email]","website":"[website]","headshots":"[image_link]","title":"[title]","bio":"[bio]"}
+               Instruction-> Return only json data no other words so it can be used by parsing
+            """, session_id=sessionid)
+        try:
+            kit_data = json.loads(data.data.output)
+            pdf_path = f"static/Speaker_Kit_Cover_Two_Pages_Wide_Short{int(time.time())}.pdf"
+            create_speaker_kit_cover(
+                pdf_path=pdf_path,
+                bg_image_path="publicspeakerhero.jpeg",
+                headshot_path='' if kit_data.get('headshots', '') == '' else "static" + kit_data['headshots'].split("/static")[1],
+                speaker_name=kit_data.get('name', ''),
+                tagline=kit_data.get('title', ''),
+                tags=kit_data.get('title', ''),
+                blur_radius=15,
+                about_text=kit_data.get('bio', ''),
+                career_highlights=[
+                    "Authored best-selling book 'The AI Alchemist: ' ",
+                    "Keynote speaker at over 100 international conferences on AI and leadership,",
+                    "Led a groundbreaking initiative that resulted in a 30% efficiency ",
+                    "Recognized as 'Top Innovator in Tech' by TechForward Magazine (2023)  ",
+                    "Founded a highly successful startup focused on ethical AI solutions,  ",
+                    "Delivered a highly-rated TEDx talk on 'The Future of Human-AI Collaboration .",
+                ]
+            )
+            base_url = str(request.base_url)
+            new_msg = ChatMessage(user=username, message=f"{base_url}{pdf_path}", image=image, session_id=sessionid)
+            db.add(new_msg)
+            db.commit()
+            db.close()
+            return {"status": "ok", "message": f"{base_url}{pdf_path}"}
+        except Exception as e:
+            print("Error creating speaker kit:", e)
+            return {"status": "error", "message": "Failed to create speaker kit."}
+        
+        # data=collector_agent.run("Extract data",session_id=sessionid)
+        # print(data)
+        # print(data)
+        # res=json.loads(data)
+        # print(data)
+        # return {"status": "ok","message":data }
+        # kit_data=request_speaker_kit(data.data.output)
+        # print(kit_data)
+        # pdf_path=f"static/Speaker_Kit_Cover_Two_Pages_Wide_Short{int(time.time())}.pdf"
+        # create_speaker_kit_cover(
+        #     pdf_path=pdf_path,
+        #     bg_image_path="publicspeakerhero.jpeg", # Original unblurred image path
+        #     headshot_path="static"+kit_data['images']['headshot']['url'].split("/static")[1],
+        #     speaker_name=kit_data['name'],
+        #     tagline=kit_data['tagline'],
+        #     tags=kit_data['title'],
+        #     blur_radius=15,
+        #     about_text=(
+        #         "Jordan Smith is a visionary leader and acclaimed author, renowned for his "
+        #         "transformative insights into modern leadership and technological innovation. "
+        #         "With over two decades of experience, Jordan empowers organizations and individuals "
+        #         "to navigate complex challenges and unlock their full potential in the digital age."
+        #     ),
+        #     career_highlights=[
+        #           "Authored best-selling book 'The AI Alchemist: ' ",
+        #         "Keynote speaker at over 100 international conferences on AI and leadership,",
+        #         "Led a groundbreaking initiative that resulted in a 30% efficiency ",
+        #         "Recognized as 'Top Innovator in Tech' by TechForward Magazine (2023)  ",
+        #         "Founded a highly successful startup focused on ethical AI solutions,  ",
+        #         "Delivered a highly-rated TEDx talk on 'The Future of Human-AI Collaboration .",
+        #     ]
+        # )
+        # base_url = str(request.base_url)  
+        # new_msg = ChatMessage(user=username, message=f"{base_url}{pdf_path}", image=image,session_id=sessionid)
+        # db.add(new_msg)
+        # db.commit()
+        # db.close() 
+        # return {"status": "ok","message":"" f"{base_url}{pdf_path}" }
     data = {"user": "agent", "message":message , "image": None,"session_id":sessionid}
 
     new_msg = ChatMessage(user= "agent", message=message, session_id=sessionid)

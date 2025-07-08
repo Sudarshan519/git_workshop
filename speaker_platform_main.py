@@ -1,6 +1,7 @@
 import os
 os.environ["TEAM_API_KEY"] = "faa44950238a5037b4bfd671106f8d95ad686a318b5c05afa525377f18ae7c45"
 from aixplain.factories import AgentFactory
+from textwrap import dedent
 from speaker_platform import speaker_prompt
 # Create a model tool
 # model_tool = AgentFactory.create_model_tool(
@@ -12,10 +13,34 @@ agent = AgentFactory.create(
     # tools=[
     #     model_tool
     # ],
-    description="An interactive speaker agent that help user create speaker kit.",
+    description="An interactive speaker agent that help user create speaker kit.Ask question one by one.Avoid repeating questions.",
     llm_id="679a80334d6aa81bfab338b3", # Grok 2
-    instructions=speaker_prompt # GPT 4o
+    instructions=dedent(speaker_prompt)  # GPT 4o
 )
+
+# collector_agent = AgentFactory.create(
+#     name="CollectorAgent",
+#     description="Validates and structures user information",
+#     instructions=dedent("""
+#     You receive raw user responses and must:
+#     1. Validate each field:
+#        - Email must be valid format
+#        - Age must be positive integer
+#        - Name must be at least 2 words
+#     2. Transform into structured JSON
+#     3. Handle validation errors by requesting corrections
+#     4. Pass validated data to ExportAgent
+    
+#     Validation Rules:
+#     - name: Required, min 2 words
+#     - email: Valid email format
+#     - age: Positive integer 13-120
+#     - location: Non-empty string
+#     """),
+#     tools=[],  # Could add validation tools here
+    
+# )
+
 # print(agent.id)
 # agent=AgentFactory.get(
 #     '6865ed6161f3437545d8a6b3'
