@@ -8,20 +8,23 @@ from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
-from sqlalchemy import Column, Integer, String, DateTime, create_engine
+from sqlalchemy import Column, Integer, String, DateTime, create_engine,Boolean
 from sqlalchemy.orm import sessionmaker, declarative_base
 from datetime import datetime
 import time
 from uuid import uuid4
 from sqlalchemy import desc
 import os, shutil 
-from speaker_platform_main import agent
+from agents.speaker_platform_agent import agent
 from aixplain.modules.agent import OutputFormat
 # from request_speaker_kit import request_speaker_kit
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-
+from database.db import get_db, SessionLocal, engine
+from models.models import UserSession, ChatMessage, AgentResponse,Base
+# create all tables if they don't exist
+Base.metadata.create_all(bind=engine)
 # === Setup ===
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="super-secret-y")
@@ -47,45 +50,14 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# === Database Setup ===
-DATABASE_URL = "sqlite:///./chat.db"
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-Base = declarative_base()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-class UserSession(Base):
-    __tablename__ = "user_sessions"
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, nullable=False)
-    # image_url = Column(String, nullable=False)
-    # image_label=Column(String,nullable=False)
-    # section=Column(String, nullable=False)
-    sessionid = Column(String, unique=True, nullable=False)
-    agent_session_id=Column(String,unique=True,nullable=True)
-    
-    timestamp = Column(DateTime, default=datetime.utcnow)
 
 @app.get("/auth/check-session")
 def check_session(request: Request):
     if "username" in request.session:
         return {"status": "ok"}
     return JSONResponse(status_code=401, content={"error": "Not logged in"})
-class ChatMessage(Base):
-    __tablename__ = "chat_messages"
-    id = Column(Integer, primary_key=True, index=True)
-    user = Column(String, nullable=False)
-    session_id=Column(String,nullable=False)
-    message = Column(String, nullable=True)
-    image = Column(String, nullable=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
 
-Base.metadata.create_all(bind=engine)
 
 # === Routes ===
 @app.get("/", response_class=HTMLResponse)
@@ -166,41 +138,63 @@ async def send_message(request: Request,restart:bool=False, message: str = Form(
         image =base_url+ f"/static/uploads/{filename}"
         print(image)
         response=agent.run(image,session_id=sessionid)
+        
     else:
         response=agent.run(message,session_id=sessionid)
         print(response.data.output)
         # message=response.data.output
+    data = {"user": "agent", "message":message , "image": None,"session_id":sessionid}
+    # insert user message
     new_msg = ChatMessage(user=username, message=message, image=image,session_id=sessionid)
     db.add(new_msg)
     db.commit()
     db.close()
-    message=markdown.markdown(response.data.output)
-    if message.__contains__("ready to move on to the next section") or message.__contains__("next section of your speaker kit")or message.__contains__("cover page") or message.__contains__("What section would you like to work on next"):
+    # save agent response to database
+    new_msg = ChatMessage(user= "agent", message=response.data.output, session_id=sessionid)
+    db.add(new_msg)
+    db.commit()
+    message=markdown.markdown(response.data.output) 
+    # if "Do you have a personal mission" in message:
+        
+    if message.__contains__("a professional headshot") or message.__contains__("Please upload a professional headshot"):
         data = agent.run(
             """extract data from the session in json format like 
-               {"name":"[Name]" ,"email":"[Email]","website":"[website]","headshots":"[image_link]","title":"[title]","bio":"[bio]"}
+               {"name":"[Name]" ,"email":"[Email]","website":"[website]","headshots":"[image_link]","tagline":"[tagline]","subtagline":"[subtagline]","bio":"[bio],"career_highlights":["[highlight1]","[highlight2]","[highlight3]"],"topics":[{"title":"[topic1_title]","description":"[topic1_description]","image":"[topic1_image]"},{"title":"[topic2_title]","description":"[topic2_description]","image":"[topic2_image]"}]}
                Instruction-> Return only json data no other words so it can be used by parsing
             """, session_id=sessionid)
+        # save agent response to database 
+        message=data.data.output
+        # save agent response to db
+        agent_response = AgentResponse(session_id=sessionid, output=message)
+        db.add(agent_response)
+        db.commit()
+  
         try:
             kit_data = json.loads(data.data.output)
+            name=kit_data.get('name', '')
             pdf_path = f"static/Speaker_Kit_Cover_Two_Pages_Wide_Short{int(time.time())}.pdf"
             create_speaker_kit_cover(
                 pdf_path=pdf_path,
                 bg_image_path="publicspeakerhero.jpeg",
                 headshot_path='' if kit_data.get('headshots', '') == '' else "static" + kit_data['headshots'].split("/static")[1],
                 speaker_name=kit_data.get('name', ''),
-                tagline=kit_data.get('title', ''),
-                tags=kit_data.get('title', ''),
+                tagline=kit_data.get('tagline', ''),
+                tags=kit_data.get('subtagline', ''),
                 blur_radius=15,
-                about_text=kit_data.get('bio', ''),
-                career_highlights=[
+                about_text=kit_data.get('bio',             f"{name} is a visionary leader and acclaimed author, renowned for his "
+            "transformative insights into modern leadership and technological innovation. "
+            "With over two decades of experience, Jordan empowers organizations and individuals "
+            "to navigate complex challenges and unlock their full potential in the digital age."),
+                career_highlights=
+                kit_data.get("career_highlights",
+                [
                     "Authored best-selling book 'The AI Alchemist: ' ",
                     "Keynote speaker at over 100 international conferences on AI and leadership,",
                     "Led a groundbreaking initiative that resulted in a 30% efficiency ",
                     "Recognized as 'Top Innovator in Tech' by TechForward Magazine (2023)  ",
                     "Founded a highly successful startup focused on ethical AI solutions,  ",
                     "Delivered a highly-rated TEDx talk on 'The Future of Human-AI Collaboration .",
-                ]
+                ])
             )
             base_url = str(request.base_url)
             new_msg = ChatMessage(user=username, message=f"{base_url}{pdf_path}", image=image, session_id=sessionid)
@@ -250,11 +244,8 @@ async def send_message(request: Request,restart:bool=False, message: str = Form(
         # db.commit()
         # db.close() 
         # return {"status": "ok","message":"" f"{base_url}{pdf_path}" }
-    data = {"user": "agent", "message":message , "image": None,"session_id":sessionid}
 
-    new_msg = ChatMessage(user= "agent", message=message, session_id=sessionid)
-    db.add(new_msg)
-    db.commit()
+
     db.close()
     # with open(MESSAGES_FILE, "r") as f:
     #     messages = json.load(f)

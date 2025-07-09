@@ -537,7 +537,7 @@
     <script>
       const chatbox = document.getElementById("chatbox");
       const form = document.getElementById("chatForm");
-      
+        const fileInput = document.getElementById('fileInput');
       // Scroll to bottom of chat initially
       chatbox.scrollTop = chatbox.scrollHeight;
       
@@ -547,6 +547,8 @@
         const messageInput = form.elements.message;
         const message = messageInput.value.trim();
          await fetch("/send", {  method: "POST", body: formData  });
+   // Clear the file input after "uploading"
+      fileInput.value = '';
             loadMessages();
         if (message) {
           // Add user message to chat immediately
@@ -649,7 +651,7 @@
       loadMessages();
       
       // Optional: Poll for new messages periodically
-      setInterval(loadMessages, 10000);
+      // setInterval(loadMessages, 10000);
     </script>
 </body>
 </html>
