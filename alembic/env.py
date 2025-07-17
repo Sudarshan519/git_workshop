@@ -7,8 +7,7 @@ from alembic import context
 
 
 # 
-from test_mainapp import Base  # Import your Base from the main app module 
-from models.models import ChatMessage,AgentResponse,UserSession  # Import your session data model
+from models.models import ChatMessage,AgentResponse,UserSession,Base # Import your session data model
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

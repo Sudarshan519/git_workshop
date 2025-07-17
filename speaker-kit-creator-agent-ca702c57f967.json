@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "speaker-kit-creator-agent",
+  "private_key_id": "61d2e5492fd2ff48c4d857d51fc7ee1ed15ad2f0",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDGfwsGznNdf10y\n+XJINU8y93dbMdRZpweYjSPS7J9Yc4Ra+fXgkXXaV7I0vDV8dw3I4blwR9BxxZDX\n10Dkhx1oeIp3U3GI8Kx1bTh8l+cVejn1WM7WcNtCLBXOxoXX2RrsPBKwraoXeLat\njxognhcWQYz/LOBItx6NBDFkZhGjzxrG2WD1LmFtzhc61dx07tDyyDOOky64W3vO\njxFFY9Eb98NuxhUZ9TAAGN0747juWAUowep1giU1YYS2LsPso6fpUHuojsTeWCs8\ntb8/Ft9z9zS6GiGnsS3HJxpntokoBQs3dUo8wavikLRimKIBLOBWqiHk4rCPewuV\nahoZRKUXAgMBAAECggEAB/XJTJUT5aB5bYAOYrHsl/0k5rMpXQ0Ijh1piIhfstgz\nFcOSENbp1H88Jhw+wtvdYXxtMiusbXDq/ZTkGntb+mK3HtDpq9Wxp3s2pDHNR7xh\nPaMO7GTrOLdJipjF06GhEESFIAZe3KvFG6cHo7ON9nZbf/zd47H1l4R0XJ6GlOc4\n+F8MUF3dmwGyu0l86jYye3QZGPN6lfGL4PGJlKdHWb0yhyxxBMTl+LlZ2hmGPzIt\ngLt/MNapO/RxEgCvA6iXEonfN4YnGr3/KhsgFFff1gfZ81TG4QCXPIybUAyQ+oE2\n8dKODAOGRwVrbTWFzsIK+sK2xdo82ZPN5h90kKg8uQKBgQD2ljP/L7xBaCAqeIkT\nnUQvqROCNuM+qsAo9zXXK3t8rPIpFgL41yzrFvmtiy2o/jrdG2+Pk5RksqnRVOkH\n9czl+sbX+YkJO8qOXPe5krC4CkjbpnJGHotIpa+W/iUs3i7ADcdV+Y5w3Ibi1Y6E\nY7lVl4O13g4fGLJ8v2s8DXJ62QKBgQDOEt7RPq7UAk43V1e5G618EGQAvXgrRHt5\nCqxxKnbNaRufib6HoXxNISn5iYRmZaRWR7NYwXEhOUnfZZUNxLaTIbrm78ce4tCz\nzZzafjd6lz+6i+XaOdy8YpDWEAwGWlhJiSdqkm7lYfyoVeVwyfbfCdus9S67AnL0\n09FxBXXJbwKBgQC6z5xg7dcfbjVAN8URmQl5WgwvkEmkxlOCNZcShhytnZBwU/64\narva9rL9KP3Uk5YgwJJKIbJAf6Jrtno8z5kFenF+WcvZtPSF2iTK8Dj1lMURsw3L\n1YQL64oVSED9tu2QDmA/4CprkoaV/thTsAFOuNTNyYbFRD6kh5hEDKP4MQKBgBHx\nHqlFNd+Lm9fBqQea203z92EBHhdWTRHK1hy8P7++qQMI8SfJ7ZKhkpABYx+vNdG1\nSG4v2XO1EzN6GrIqMGM7CpTUx5du1BDzk/aKCraHuKq7R3Xql8dnJYkduI5NC2bL\npDzpJvKdx2u4ntNlIjNlHlU+u6TYn72lO5UFjq3NAoGBAMwF+MBSdzR/EYJblI5J\nn++RYTkkL5H2ChinpHnKgxrvdvpwrgHE2/bS3GVXr1IRwW+tTVzobbse3SKy7L7l\nLBnuc3eI3CfykYNFo4DoBXdI8TjorfSbJGuDZRE6orxN9HmSN6dPRf70Pli1ERbm\nLQd+UyeAlgZBWDmGYCTVOWgs\n-----END PRIVATE KEY-----\n",
+  "client_email": "slide-creation@speaker-kit-creator-agent.iam.gserviceaccount.com",
+  "client_id": "105522882071343220564",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/slide-creation%40speaker-kit-creator-agent.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
