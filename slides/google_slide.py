@@ -268,7 +268,7 @@ def create_speaker_kit_slides(kit_data):
         import requests
         
         SCOPES = ['https://www.googleapis.com/auth/presentations', 'https://www.googleapis.com/auth/drive']
-        SERVICE_ACCOUNT_FILE = 'service-account.json'
+        SERVICE_ACCOUNT_FILE = 'service-account-data.json'
         
         # Check if service account file exists
         if not os.path.exists(SERVICE_ACCOUNT_FILE):

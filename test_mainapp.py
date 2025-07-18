@@ -33,6 +33,7 @@ origins = [
     "http://localhost:3000",  # React dev server
     "http://localhost:5173",  # if using Vite
     "http://127.0.0.1:3000",  # alternative
+     "https://speaker-kit.testir.xyz",
 ]
 
 app.add_middleware(
@@ -301,21 +302,28 @@ async def pdf_request(session_id: str,request: Request,db: Session = Depends(get
     # sessionid = request.session.get("session")
     data=team.run("""extract data from the session in json format like 
                {"name":"[Name]" ,"email":"[Email]","website":"[website]","headshots":"[image_link_section_1]","heashot1":"[image_link_section2]", "tagline":"[tagline]","subtagline":"[subtagline]","bio":"[about speaker],"career_highlights":["[highlight1]","[highlight2]","[highlight3]"],"topics":[{"title":"[topic1_title]","description":"[topic1_description]","image":"[topic1_image]"},{"title":"[topic2_title]","description":"[topic2_description]","image":"[topic2_image]"}]}
-               Instruction-> Return only json data no other words so it can be used by parsing and return empty on not able to extract or not available data.Generate at least 6 carrer highlights,and bio should not be empty should be generate from about.
+               Instruction-> Return only json data no other words so it can be used by parsing and return empty on not able to extract or not available data.Generate at least 6 carrer highlights,and bio should not be empty should be generate from about.Json should be able to load using json.loads([output]).Avoid adding lines
          """,session_id=session_id)
-    kit_data=data.data.output
-    
-    print(kit_data)
-    agent_response = AgentResponse(session_id=session_id, output=kit_data)
+    kit_datas=data.data.output
+    # Fix broken newlines inside the JSON string
+    fixed_json = kit_datas 
+    print(kit_datas)
+    # with open("abc.json",'w')as f:
+    #     f.write(kit_datas)
+    print(fixed_json)
+    agent_response = AgentResponse(session_id=session_id, output=kit_datas)
     db.add(agent_response)
     db.commit()
 
     # kit_data=request_speaker_kit(data.data.output)
-    jsondata=(data.data.output.replace("```json","").replace("```",'').replace("'",'"'))
+    jsondata=(data.data.output)
     # print(json.loads(jsondata))
     # Step 1: Convert to dict
- 
+    # print(data.data.output['bio'])
     # Step 3: Convert back to dict via JSON
+    # json_string = json.dumps(jsondata) 
+    kit_data=None
+    # print(jsondata)
     kit_data = json.loads(jsondata)
     # Add bio only if it is missing or empty
     if not kit_data.get("bio"):  # This covers both missing and empty string

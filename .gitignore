@@ -1,3 +1,6 @@
 /venv
 agent_with_data.py
 .env
+service-account-data.json
+abc.json
+agents/extracted.json

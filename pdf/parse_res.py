@@ -5,7 +5,8 @@ json_string = "{\"name\": \"Jane Doe\", \"title\": \"Data Scientist\", \"bio\": 
 
 # Convert the JSON string to a Python dictionary
 data = json.loads(json_string)
-
+abc={"name": "Sudarshan Shrestha", "email": "sudarshan@gmail.com", "website": "", "headshots": "http://localhost:8000/static/uploads/9cf6134306194a1e8c4c75336a8934e0.jpg", "headshot1": "https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D", "tagline": "I help teams build unstoppable confidence in high-stakes situations", "subtagline": "Keynote Speaker | Author | Leadership Strategist", "bio": "Sudarshan Shrestha is a seasoned professional with 10 years of experience in product development, having worked in over 30 cities. He has collaborated with notable clients like AI Industry Rockstar and Hotei. Driven by the belief that 'tech should serve humanity,' Sudarshan combines expertise with a mission to make a meaningful impact through his work.", "career_highlights": ["10 years of experience in product development", "Worked in over 30 cities globally", "Collaborated with AI Industry Rockstar", "Partnered with Hotei", "Specializes in AI Agentic Framework Development", "Delivers research-based talks on AI and tech"], "topics": [{"title": "AI Agentic Framework Development", "description": "Build agents to do a specific task", "image": "https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D"}]}
+print(json.dumps(abc))
 # You now have a Python dictionary 'data' that represents your JSON
 print("Python Dictionary (data):")
 print(data)
