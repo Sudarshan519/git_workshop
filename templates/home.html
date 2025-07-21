@@ -537,7 +537,7 @@
     <script>
       const chatbox = document.getElementById("chatbox");
       const form = document.getElementById("chatForm");
-      
+        const fileInput = document.getElementById('fileInput');
       // Scroll to bottom of chat initially
       chatbox.scrollTop = chatbox.scrollHeight;
       
@@ -546,35 +546,39 @@
         const formData = new FormData(form);
         const messageInput = form.elements.message;
         const message = messageInput.value.trim();
-         await fetch("/send", {  method: "POST", body: formData  });
-            loadMessages();
+        // Add user message to chat immediately
         if (message) {
-          // Add user message to chat immediately
           addMessageToChat({
             user: "user",
             message: message,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }, true);
-          
-          // Show typing indicator
-          showTypingIndicator();
-          
-          // Clear input
-          messageInput.value = "";
-          
-          try {
-            // Send to server
-        //   await fetch("/send", {  method: "POST", body: formData  });
-            // Load new messages
-            await loadMessages();
-          } catch (error) {
-            console.error("Error sending message:", error);
-            addErrorMessage();
-          } finally {
-            // Hide typing indicator
-            hideTypingIndicator();
-          }
         }
+        // Show typing indicator
+        showTypingIndicator();
+        // Clear input
+        messageInput.value = "";
+        try {
+          // Send to server and get response
+          const res = await fetch("/send", { method: "POST", body: formData });
+          const response = await res.json();
+          // Hide typing indicator
+          hideTypingIndicator();
+          if (response && response.message) {
+            addMessageToChat({
+              user: "agent",
+              message: response.message,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }, false);
+          }
+          // Optionally, handle section_complete, irrelevant, etc. statuses here
+        } catch (error) {
+          console.error("Error sending message:", error);
+          addErrorMessage();
+          hideTypingIndicator();
+        }
+        // Clear the file input after "uploading"
+        fileInput.value = '';
       };
       
       async function loadMessages() { 
@@ -645,11 +649,11 @@
         }
       }
       
-      // Load initial messages
+      // Only call loadMessages() for initial load
       loadMessages();
       
       // Optional: Poll for new messages periodically
-      setInterval(loadMessages, 10000);
+      // setInterval(loadMessages, 10000);
     </script>
 </body>
 </html>

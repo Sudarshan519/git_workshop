@@ -39,7 +39,7 @@ def process_and_draw_background(canvas_obj, image_path, blur_rad):
         canvas_obj.setFillColor(colors.black)
         canvas_obj.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT, fill=1)
 
-def create_speaker_kit_cover(pdf_path, bg_image_path, headshot_path, speaker_name, tagline, tags,
+def create_speaker_kit_cover(pdf_path, bg_image_path, headshot_path,headshot_path1, speaker_name, tagline, tags,
                              discover_text="Discover Solutions", blur_radius=10, about_text="", career_highlights=[]):
     c = canvas.Canvas(pdf_path, pagesize=(PAGE_WIDTH, PAGE_HEIGHT))
 
@@ -97,7 +97,7 @@ def create_speaker_kit_cover(pdf_path, bg_image_path, headshot_path, speaker_nam
     image_x = PAGE_WIDTH * 0.6
     image_y = about_text_y + (about_text_frame_height - headshot_height) / 2
 
-    c.drawImage(ImageReader(headshot_path), image_x, image_y, width=headshot_width, height=headshot_height, mask='auto')
+    c.drawImage(ImageReader(headshot_path1), image_x, image_y, width=headshot_width, height=headshot_height, mask='auto')
 
     # Career Highlights
     c.setFont("Helvetica-Bold", 18)
@@ -154,6 +154,7 @@ def create_speaker_kit_cover(pdf_path, bg_image_path, headshot_path, speaker_nam
 #     pdf_path="Speaker_Kit_Cover_Two_Pages_Wide_Short.pdf",
 #     bg_image_path="publicspeakerhero.jpeg", # Original unblurred image path
 #     headshot_path="Realtor-Headshots-2.webp",
+#     headshot_path1="susan-seay-headshot-normal-illinois-1.jpg",  # Second headshot for the About page
 #     speaker_name="Jordan Smith",
 #     tagline="AIFOR ENTREPRENEURS & GLOBAL INNOVATION",
 #     tags=["Keynote Speaker | Leadership Strategist | Author"],
