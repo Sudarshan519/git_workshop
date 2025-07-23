@@ -327,7 +327,7 @@ def create_speaker_kit_slides(kit_data):
         drive_service = get_drive_service(credentials)
         # Prepare image URLs using Drive helpers
         bg_image_path = kit_data.get('bg_image_path', 'publicspeakerhero.jpeg')
-        headshot_path = kit_data.get('headshot_path', 'publicspeakerhero.jpeg')
+        headshot_path = kit_data.get('headshots', 'publicspeakerhero.jpeg')
         if not (bg_image_path.startswith('http://') or bg_image_path.startswith('https://')):
             # Only process local files
             blurred_bg_path = blur_and_resize_image(bg_image_path, SLIDE_WIDTH, SLIDE_HEIGHT, blur_radius=15)
@@ -338,7 +338,7 @@ def create_speaker_kit_slides(kit_data):
 
         # 2. Prepare dynamic content
         SPEAKER_NAME = kit_data.get('name', 'Speaker')
-        TAGLINE = kit_data.get('title', '')
+        TAGLINE = kit_data.get('tags', '')
         TAGS = kit_data.get('title', '')
         ABOUT_TEXT = kit_data.get('bio', '')
         CAREER_HIGHLIGHTS = kit_data.get('career_highlights', [

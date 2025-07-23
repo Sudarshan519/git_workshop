@@ -7,6 +7,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 # from git_workflow.pdf.test import kit_data
+from ideogram_request import get_background_image
 from slides.google_slide import create_speaker_kit_slides
 from models.models import AgentResponse
 from starlette.middleware.sessions import SessionMiddleware
@@ -27,7 +28,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # === Setup ===
 app = FastAPI()
-app.add_middleware(SessionMiddleware, secret_key="super-secret-y")
+app.add_middleware(SessionMiddleware,    
+                    secret_key="your-secret-key",
+                    same_site="none",       # <-- Required for cross-site cookie
+                    https_only=True  )
 # Allow requests from your React frontend
 origins = [
     "http://localhost:3000",  # React dev server
@@ -157,7 +161,7 @@ async def send_message(request: Request, restart: bool = False, message: str = F
     #                 career_highlights=kit_data.get('career_highlights', [])
     #             )
     #             pdf_url = f"{base_url}/{pdf_path}"
-    #             agent_message_content = f"\n\nCongratulations! Your speaker kit is ready. [Download PDF]({pdf_url})"
+    #             agent_message_content = f"\n\nCongratulations! Your speaker kit is ready. [Open Slide]({pdf_url})"
     #             db.add(ChatMessage(user="agent", message=agent_message_content, session_id=sessionid))
     #             db.commit()
     #             return {"message":f"\n\nCongratulations! Your speaker kit is ready. [Download PDF]({pdf_url})"}
@@ -298,25 +302,29 @@ async def send_message(request: Request, restart: bool = False, message: str = F
 @app.get("/request-pdf/{session_id}")
 async def pdf_request(session_id: str,request: Request,db: Session = Depends(get_db)):
     messages = db.query(ChatMessage).filter(ChatMessage.session_id== session_id).all()
+    agent_response=db.query(AgentResponse).filter(AgentResponse.session_id==session_id).all()
+    if not agent_response:
     # return messages
     # sessionid = request.session.get("session")
-    data=team.run("""extract data from the session in json format like 
-               {"name":"[Name]" ,"email":"[Email]","website":"[website]","headshots":"[image_link_section_1]","heashot1":"[image_link_section2]", "tagline":"[tagline]","subtagline":"[subtagline]","bio":"[about speaker],"career_highlights":["[highlight1]","[highlight2]","[highlight3]"],"topics":[{"title":"[topic1_title]","description":"[topic1_description]","image":"[topic1_image]"},{"title":"[topic2_title]","description":"[topic2_description]","image":"[topic2_image]"}]}
-               Instruction-> Return only json data no other words so it can be used by parsing and return empty on not able to extract or not available data.Generate at least 6 carrer highlights,and bio should not be empty should be generate from about.Json should be able to load using json.loads([output]).Avoid adding lines
-         """,session_id=session_id)
-    kit_datas=data.data.output
-    # Fix broken newlines inside the JSON string
-    fixed_json = kit_datas 
-    print(kit_datas)
-    # with open("abc.json",'w')as f:
-    #     f.write(kit_datas)
-    print(fixed_json)
-    agent_response = AgentResponse(session_id=session_id, output=kit_datas)
-    db.add(agent_response)
-    db.commit()
-
+        data=team.run("""extract data from the session in json format like 
+                {"name":"[Name]" ,"email":"[Email]","website":"[website]","headshots":"[image_link_section_1]","heashot1":"[image_link_section2]", "tagline":"[tagline]","subtagline":"[subtagline]","bio":"[about speaker],"career_highlights":["[highlight1]","[highlight2]","[highlight3]"],"topics":[{"title":"[topic1_title]","description":"[topic1_description]","image":"[topic1_image]"},{"title":"[topic2_title]","description":"[topic2_description]","image":"[topic2_image]"}]}
+                Instruction-> Return only json data no other words so it can be used by parsing and return empty on not able to extract or not available data.Generate at least 6 carrer highlights,and bio should not be empty should be generate from about.Json should be able to load using json.loads([output]).Avoid adding lines
+            """,session_id=session_id)
+        kit_datas=data.data.output
+        # Fix broken newlines inside the JSON string
+        fixed_json = kit_datas 
+        print(kit_datas)
+        # with open("abc.json",'w')as f:
+        #     f.write(kit_datas)
+        print(fixed_json)
+        agent_response = AgentResponse(session_id=session_id, output=kit_datas)
+        db.add(agent_response)
+        db.commit()
+        jsondata=(data.data.output)
+    else:
+        jsondata=agent_response[-1].output
     # kit_data=request_speaker_kit(data.data.output)
-    jsondata=(data.data.output)
+    
     # print(json.loads(jsondata))
     # Step 1: Convert to dict
     # print(data.data.output['bio'])
@@ -336,10 +344,10 @@ async def pdf_request(session_id: str,request: Request,db: Session = Depends(get
         career_highlights.append("")
     slides_url = create_speaker_kit_slides({
                 "bg_image_path": "publicspeakerhero.jpeg",
-                "headshot_path":kit_data.get("headshotss", 'https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D'),
+                "headshot_path":kit_data.get("headshots", 'https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D'),
                 "name":kit_data.get("name","Sudarshan Shrestha"),
                 "title":kit_data.get("tagline","Sudarshan Shrestha"),
-                "tags":kit_data.get("professional_labels","Sudarshan Shrestha"),
+                "tags":kit_data.get("subtagline","Sudarshan Shrestha"),
                 "bio": kit_data.get("bio"," "),
                 "career_highlights":kit_data.get("career_highlights", [
                     "Authored best-selling book 'The AI Alchemist: ' ",
@@ -373,7 +381,7 @@ async def pdf_request(session_id: str,request: Request,db: Session = Depends(get
                 ])
             })
     db.add(ChatMessage(user="agent", message=f"\n\nCongratulations! Your speaker kit is ready. [Download PDF]({slides_url})", session_id=session_id))
-    db.commit()
+    # db.commit()
     print("Slides created at:", slides_url)
     return {"message":slides_url}
     # Safely extract headshot URL if available
@@ -489,3 +497,6 @@ async def get_session(session_id: str,request: Request,db: Session = Depends(get
     messages = db.query(ChatMessage).filter(ChatMessage.session_id== session_id).all()
     return messages
 
+@app.get("/ideogram")
+def get_ideogram_image(request:Request):
+    return get_background_image("""{'name': 'Sudarshan Shrestha', 'email': 'sudarshan@gmail.com', 'website': '', 'headshots': 'http://localhost:8000/static/uploads/9cf6134306194a1e8c4c75336a8934e0.jpg', 'headshot1': 'https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D', 'tagline': 'I help teams build unstoppable confidence in high-stakes situations', 'subtagline': 'Keynote Speaker | Author | Leadership Strategist', 'bio': "Sudarshan Shrestha is a seasoned professional with 10 years of experience in product development, having worked in over 30 cities. He has collaborated with notable clients like AI Industry Rockstar and Hotei. Driven by the belief that 'tech should serve humanity,' Sudarshan combines expertise with a mission to make a meaningful impact through his work.", 'career_highlights': ['10 years of experience in product development', 'Worked in over 30 cities globally', 'Collaborated with AI Industry Rockstar', 'Partnered with Hotei', 'Specializes in AI Agentic Framework Development', 'Delivers research-based talks on AI and tech'], 'topics': [{'title': 'AI Agentic Framework Development', 'description': 'Build agents to do a specific task', 'image': 'https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D'}]}""")
