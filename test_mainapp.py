@@ -204,7 +204,7 @@ async def send_message(request: Request, restart: bool = False, message: str = F
         try:
             with open(filepath, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
-            image_url = f"/static/uploads/{filename}"
+            image_url = f"/speaker-kit/static/uploads/{filename}"
             logger.info(f"Successfully saved file to: {filepath}")
             
             # Construct agent_input here, now that image_url is determined
@@ -485,7 +485,7 @@ async def pdf_request(session_id: str,request: Request,db: Session = Depends(get
     try:
         prompt_data = json.dumps(kit_data)  # or a string that summarizes kit_data as prompt
         background_image_url = get_background_image(prompt_data, aspect_ratio="16x9")
-        # print("Background image URL from ideogram:", background_image_url)
+        print("Background image URL from ideogram:", background_image_url)
 
 
         from slides.google_slide import process_speaker_kit_images
