@@ -265,12 +265,37 @@ def create_speaker_kit_slides(kit_data, bg_image_path=None):
         headshot1_url = headshot1_path if headshot1_path else default_headshot
 
         # Prepare image URLs using Drive helpers
-        # headshot_url = ensure_image_on_drive_and_get_url(headshot_path, drive_service, 'headshot', default_url=default_headshot)
+        bg_image_path = kit_data.get('bg_image_path', 'publicspeakerhero.jpeg')
+        headshot_path = kit_data.get('headshots', 'publicspeakerhero.jpeg')
+        if not (bg_image_path.startswith('http://') or bg_image_path.startswith('https://')):
+            # Only process local files
+            blurred_bg_path = blur_and_resize_image(bg_image_path, SLIDE_WIDTH, SLIDE_HEIGHT, blur_radius=15)
+            bg_image_url = ensure_image_on_drive_and_get_url(blurred_bg_path, drive_service, 'background')
+        else:
+            bg_image_url = bg_image_path
+        headshot_url = ensure_image_on_drive_and_get_url(headshot_path, drive_service, 'headshot')
 
-        headshot_url = headshot_path if headshot_path else default_headshot
+        # 2. Prepare dynamic content
+        SPEAKER_NAME = kit_data.get('name', 'Speaker')
+        TAGLINE = kit_data.get('tags', '')
+        TAGS = kit_data.get('title', '')
+        ABOUT_TEXT = kit_data.get('bio', '')
+        CAREER_HIGHLIGHTS = kit_data.get('career_highlights', [
+            "Authored best-selling book 'The AI Alchemist'",
+            "Keynote speaker at over 100 international conferences on AI and leadership",
+            "Led a groundbreaking initiative that resulted in a 30% efficiency",
+            "Recognized as 'Top Innovator in Tech' by TechForward Magazine (2023)",
+            "Founded a highly successful startup focused on ethical AI solutions",
+            "Delivered a highly-rated TEDx talk on 'The Future of Human-AI Collaboration'",
+        ])
 
+        print(f"Speaker name: {SPEAKER_NAME}")
+        print(f"Tagline: {TAGLINE}")
 
-        # Build slide creation requests
+        # 3. Build requests for slides using REST API
+        print("Building slide requests...")
+        batch_update_url = f"https://slides.googleapis.com/v1/presentations/{presentation_id}:batchUpdate"
+        
         requests_data = [
             # Delete default slide
             {"deleteObject": {"objectId": 'p'}},
