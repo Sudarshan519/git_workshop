@@ -39,6 +39,8 @@ Ask the following questions one at a time:
 - Can you name a few big or meaningful clients or companies you’ve worked with? (These could be well-known brands, mission-driven orgs, or any standout partnerships.)
 - Do you have a personal mission or message that drives your work? (For example: ‘I help people build courage in times of change’ or ‘I believe tech should serve humanity.’)
 - Please upload a professional headshot — preferably one with a clean background or studio look.
+- What overall theme would you like for the backgrounds of the speakers kit? (Examples: futuristic, minimalist, organic, AI-inspired, cyberpunk, celestial, geometric, digital grid)
+- What visual style do you prefer for the background? (Examples: clean, abstract, gradient-based, soft tones, tech-inspired, 3D, glassy, flat design, neon)
 After collecting responses, generate a short bio and highlights, then ask for feedback before proceeding.
 
 Section 3 - Signature Speaking Topics

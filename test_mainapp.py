@@ -157,28 +157,7 @@ async def send_message(request: Request, restart: bool = False, message: str = F
     username = request.session.get("username")
     sessionid = request.session.get("agent_session_id")
     slides_url=""
-    # dta=db.query(AgentResponse).filter(AgentResponse.session_id==sessionid).first()
 
-    # if dta:
-    #             pdf_path = f"static/Speaker_Kit_Cover_Two_Pages_Wide_Short{int(time.time())}.pdf"
-    #             kit_data=json.loads(dta.output.replace("```json","").replace("```",''))
-    #             create_speaker_kit_cover(
-    #                 pdf_path=pdf_path,
-    #                 bg_image_path="publicspeakerhero.jpeg",
-    #                 headshot_path1=kit_data.get("headshots",""),
-    #                 headshot_path=kit_data.get("headshots",""),
-    #                 speaker_name=kit_data.get('name', 'Speaker Name'),
-    #                 tagline=kit_data.get('tagline', 'Inspirational Speaker'),
-    #                 tags=kit_data.get('professional_labels', 'Topic Expert'),
-    #                 blur_radius=15,
-    #                 about_text=kit_data.get('bio', 'About the speaker...'),
-    #                 career_highlights=kit_data.get('career_highlights', [])
-    #             )
-    #             pdf_url = f"{base_url}/{pdf_path}"
-    #             agent_message_content = f"\n\nCongratulations! Your speaker kit is ready. [Download PDF]({pdf_url})"
-    #             db.add(ChatMessage(user="agent", message=agent_message_content, session_id=sessionid))
-    #             db.commit()
-    #             return {"message":f"\n\nCongratulations! Your speaker kit is ready. [Download PDF]({pdf_url})"}
     if not username:
         return JSONResponse(status_code=401, content={"detail": "Not authenticated"})
     
@@ -209,7 +188,8 @@ async def send_message(request: Request, restart: bool = False, message: str = F
             
             # Construct agent_input here, now that image_url is determined
             agent_input = f"{original_message}\n{base_url}{image_url}" if original_message else f"{base_url}{image_url}"
-
+            db.add(ChatMessage(user=username, message=original_message, image=base_url+image_url, session_id=sessionid))
+            db.commit()
         except Exception as e: # <--- START OF EXCEPT BLOCK
             logger.error(f"Error saving file {filename} to {filepath}: {e}")
             # If saving fails, image_url remains None, which is important for the next step
@@ -220,8 +200,8 @@ async def send_message(request: Request, restart: bool = False, message: str = F
     else:
         agent_input = message # If no file, agent_input is just the message
     
-    db.add(ChatMessage(user=username, message=original_message, image=image_url, session_id=sessionid))
-    db.commit()
+        db.add(ChatMessage(user=username, message=original_message, session_id=sessionid))
+        db.commit()
     
     agent_response = team.run( agent_input, session_id=sessionid)
     # print(agent_response.__dict__)
@@ -229,8 +209,7 @@ async def send_message(request: Request, restart: bool = False, message: str = F
     print(agent_message_content)
 
 
-    # Check if speaker kit generation is triggered (adjust this condition as per your agent's output)
-    # Check if speaker kit generation is triggered (adjust this condition as per your agent's output)
+    # Check if speaker kit generation is triggered (adjust this condition as per your agent's output) 
     if "FINAL_STAGE:complete" in agent_message_content:
         try:
             jsondata = agent_message_content.replace("```json","").replace("```",'')
@@ -404,6 +383,8 @@ async def pdf_request(session_id: str,request: Request,db: Session = Depends(get
                     "tagline": "[Tagline]",
                     "subtagline": "[Subtagline]",
                     "bio": "[About speaker]",
+                    "theme":"[Theme]",
+                    "style":"[Visual Style]",
                     "career_highlights": ["[highlight1]", "[highlight2]", "[highlight3]"],
                     "topics": [
                         {"title": "[topic1_title]", "description": "[topic1_description]", "image": "[topic1_image]"},
@@ -475,18 +456,22 @@ async def pdf_request(session_id: str,request: Request,db: Session = Depends(get
         career_highlights.append("")
     kit_data["career_highlights"] = career_highlights # Update kit_data with potentially padded highlights
 
-    # Define the background image URL
-    # IMPORTANT: REPLACE THIS URL with your actual desired background image URL.
-    # background_path = get_background_image()
-    # print("Background image URL:", background_path)
-    # background_image_url = "https://firebasestorage.googleapis.com/v0/b/chat-app-c5vy3d.appspot.com/o/tmp17_mnre7.png?alt=media&token=a7255094-e0a0-4105-95de-49f89f4e1ea9" # YOUR IMAGE URL!
-
+ 
     # Call create_speaker_kit_slides (without existing_presentation_id, always creates new)
-    if True:
+    try:
         prompt_data = json.dumps(kit_data)  # or a string that summarizes kit_data as prompt
-        background_image_url = get_background_image(prompt_data, aspect_ratio="16x9")
-        # print("Background image URL from ideogram:", background_image_url)
-
+        
+        if not kit_data.get("theme","Default"):
+            theme="Default"
+        else:
+            theme=kit_data.get("theme","Default")
+        if not kit_data.get("style","Default"):
+            style="Default"
+        else:
+            style=kit_data.get("style","Default")
+        background_image_url = get_background_image(theme=theme,style=style, aspect_ratio="16x9")
+        print("Background image URL from ideogram:", background_image_url)
+        logger.info(f"Background image URL from ideogram:{background_image_url}")
 
         from slides.google_slide import process_speaker_kit_images
         kit_data = process_speaker_kit_images(kit_data)
@@ -497,9 +482,9 @@ async def pdf_request(session_id: str,request: Request,db: Session = Depends(get
             kit_data=kit_data,
             bg_image_path=background_image_url
         )
-    # except Exception as e:
-    #     logger.error(f"Error creating Google Slides: {e}")
-    #     return JSONResponse(status_code=500, content={"message": f"Failed to generate slides: {e}"})
+    except Exception as e:
+        logger.error(f"Error creating Google Slides: {e}")
+        return JSONResponse(status_code=500, content={"message": f"Failed to generate slides: {e}"})
 
     # Find the user session to update the google_slide_id
     user_session_to_update = db.query(UserSession).filter(UserSession.agent_session_id == session_id).first()
@@ -517,54 +502,7 @@ async def pdf_request(session_id: str,request: Request,db: Session = Depends(get
     db.commit()
     print("Slides created at:", slides_url)
     return {"message":slides_url}
-    # Safely extract headshot URL if available
-    # headshot_url = ""
-    # try:
-    #     headshot_url = kit_data.get('headshots', {}).get('headshot', {}).get('url', '')
-    #     if headshot_url:
-    #         if headshot_url.startswith('/static'):
-    #             headshot_path = "static" + headshot_url.split("/static")[1]
-    #         else:
-    #             headshot_path = headshot_url
-    #     else:
-    #         headshot_path = ""
-    # except Exception:
-    #     headshot_path = ""
 
-    # create_speaker_kit_cover(
-    #     pdf_path=pdf_path,
-    #     bg_image_path="publicspeakerhero.jpeg",  # Original unblurred image path
-    #     headshot_path1=kit_data.get('images', {}),
-    #     headshot_path=headshot_path,
-    #     speaker_name=name,
-    #     tagline=kit_data.get('tagline', 'Inspirational Speaker'),
-    #     tags=kit_data.get('title', 'Topic Expert'),
-    #     blur_radius=15,
-    #     about_text=kit_data.get(
-    #         'bio',
-    #         (
-    #             f"{name} is a visionary leader and acclaimed author, renowned for his "
-    #             "transformative insights into modern leadership and technological innovation. "
-    #             "With over two decades of experience, Jordan empowers organizations and individuals "
-    #             "to navigate complex challenges and unlock their full potential in the digital age."
-    #         )
-    #     ),
-    #     career_highlights=kit_data.get(
-    #         'career_highlights',
-    #         [
-    #             "Authored best-selling book 'The AI Alchemist: ' ",
-    #             "Keynote speaker at over 100 international conferences on AI and leadership,",
-    #             "Led a groundbreaking initiative that resulted in a 30% efficiency ",
-    #             "Recognized as 'Top Innovator in Tech' by TechForward Magazine (2023)  ",
-    #             "Founded a highly successful startup focused on ethical AI solutions,  ",
-    #             "Delivered a highly-rated TEDx talk on 'The Future of Human-AI Collaboration .",
-    #         ]
-    #     )
-    # )
-    return {"download_url": f"http://localhost:8000/{pdf_path}", "slides_url": slides_url}
-    sessionid = request.session.get("session")
-    messages = db.query(ChatMessage).filter(ChatMessage.session_id== sessionid).all()
-    return messages
 @app.get("/pdf")
 async def get_messages(request: Request,db: Session = Depends(get_db)):
     sessionid = request.session.get("session")
