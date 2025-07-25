@@ -11,7 +11,33 @@ def get_background_image(section2:str, aspect_ratio: str = "16x9"):
         "Api-Key": "3OxovSLIcSdX6F3Pjk_uNcWXrTxmPDuzM8Xnu8TkiZY1xO4zqhq2vl2Im6O_aDSM6yRqHBCrXaRpt1l0biMVWQ"
     },
     json={
-        "prompt":section2+"Create a background image for a speaker's kit that aligns with my brand’s tone and visual aesthetic. Do not include any human faces in the image. This is very important — no faces, no facial features, no depictions of people in any form. The artwork must contain text. Focus on abstract, thematic, or brand-aligned visual elements only — again, absolutely no human faces",
+        "prompt":section2+"""
+            Ideogram Setup:
+            Model: 2.0 
+            MP (Magic Prompt): ON
+            Style: General
+            Color: Auto
+
+            Prompt:
+            Create a high-resolution, professional background image.
+            Theme: [user input from section 2 Question 7] 
+            Style: [user input from section 2 Question 8] 
+
+            Absolutely DO NOT include:
+            - Any words, letters, numbers, symbols, or recognizable text  
+            - Any logos, branding, or iconography  
+            - Any humans, faces, body parts, or silhouettes  
+
+            Focus on:
+            - Abstract elements like soft geometric forms, circuits, holographic rings, flowing lines, or tech-like particle systems  
+            - A modern color palette fitting a futuristic design (e.g., soft purples, cyans, silvers)  
+            - Clear negative space for content overlays — balance and simplicity are key
+
+            Create a blurred image with the blur_radius of 6–10
+
+            Image must be **text-free**, **logo-free**, and **people-free**.  
+            The final result should look like a clean, versatile digital design background — **not a poster or ad**.
+        """,
         "rendering_speed": "TURBO",
         "aspect_ratio": aspect_ratio
     }

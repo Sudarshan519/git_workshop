@@ -5,4 +5,5 @@ service-account-data.json
 abc.json
 agents/extracted.json
 /frontend
-# /chat.db
+/static
+/chat.db
