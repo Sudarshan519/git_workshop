@@ -77,7 +77,7 @@ def handle_background_image(background_url: str, person_name: str) -> str:
         person_folder_name=folder_safe_person_name,
         main_images_folder_id=GOOGLE_DRIVE_MAIN_IMAGES_FOLDER_ID
     )
-
+    print(drive_url)
     return drive_url
 
 def process_speaker_kit_images(kit_data: dict) -> dict:
@@ -107,17 +107,13 @@ def process_speaker_kit_images(kit_data: dict) -> dict:
         image_url = topic.get("image")
         if image_url and is_local_image_url(image_url):
             local_path = extract_local_path(image_url)
-            if os.path.exists(local_path):
+            if local_path and os.path.exists(local_path):
                 uploaded_url = upload_and_get_public_url(
                     local_file_path=local_path,
                     person_folder_name=folder_safe_person_name,
                     main_images_folder_id=GOOGLE_DRIVE_MAIN_IMAGES_FOLDER_ID
                 )
                 topic["image"] = uploaded_url
-
-    print(f"Checking field: {field} = {url}")
-    print(f"Extracted path: {local_path}")
-    print("File exists?" , os.path.exists(local_path))
 
     return kit_data
 
@@ -148,6 +144,13 @@ def extract_local_path(url: str) -> str:
     Converts a URL like http://localhost:8003/speaker-kit/statics/uploads/image.png
     into a filesystem path like static/uploads/image.png
     """
+    print(url)
+    if url is None:
+        return "static/publicspeakerhero.jpeg"
+    if "static/" in url:
+        # Extract the part after "static/" and prepend "static/"
+        return "static/" + url.split("static/", 1)[1]
+    
     parsed = urlparse(url)
     path = parsed.path.lstrip("/")
 
@@ -166,7 +169,7 @@ def create_speaker_kit_slides(kit_data, bg_image_path=None):
     print(kit_data)
     # Use only the provided bg_image_path (should be a URL)
     if not bg_image_path:
-        bg_image_path = "https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D"
+        bg_image_url = "https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D"
 
     person_name = kit_data.get("name", "Unknown Speaker")
 
@@ -599,7 +602,7 @@ def create_speaker_kit_slides(kit_data, bg_image_path=None):
                     ] if audience_takeaways else []
                 )
             ]
-
+        
         # --- PROOF & RECOGNITION SLIDE (Conditional) ---
         if career_milestones or clients_partners or featured_in:
             requests_data += [

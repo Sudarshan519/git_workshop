@@ -482,7 +482,7 @@ async def pdf_request(session_id: str,request: Request,db: Session = Depends(get
     # background_image_url = "https://firebasestorage.googleapis.com/v0/b/chat-app-c5vy3d.appspot.com/o/tmp17_mnre7.png?alt=media&token=a7255094-e0a0-4105-95de-49f89f4e1ea9" # YOUR IMAGE URL!
 
     # Call create_speaker_kit_slides (without existing_presentation_id, always creates new)
-    try:
+    if True:
         prompt_data = json.dumps(kit_data)  # or a string that summarizes kit_data as prompt
         background_image_url = get_background_image(prompt_data, aspect_ratio="16x9")
         print("Background image URL from ideogram:", background_image_url)
@@ -497,9 +497,9 @@ async def pdf_request(session_id: str,request: Request,db: Session = Depends(get
             kit_data=kit_data,
             bg_image_path=background_image_url
         )
-    except Exception as e:
-        logger.error(f"Error creating Google Slides: {e}")
-        return JSONResponse(status_code=500, content={"message": f"Failed to generate slides: {e}"})
+    # except Exception as e:
+    #     logger.error(f"Error creating Google Slides: {e}")
+    #     return JSONResponse(status_code=500, content={"message": f"Failed to generate slides: {e}"})
 
     # Find the user session to update the google_slide_id
     user_session_to_update = db.query(UserSession).filter(UserSession.agent_session_id == session_id).first()
