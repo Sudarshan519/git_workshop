@@ -174,7 +174,7 @@ def create_speaker_kit_slides(kit_data, bg_image_path=None):
     person_name = kit_data.get("name", "Unknown Speaker")
 
     try:
-        bg_image_url = handle_background_image(bg_image_path, person_name)
+        bg_image_url = bg_image_path
     except Exception as e:
         print(f"[❌] Failed to process background image: {e}")
         bg_image_url = bg_image_path  # Fallback to original if error
